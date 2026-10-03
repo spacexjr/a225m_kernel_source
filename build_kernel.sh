@@ -15,8 +15,7 @@ cp out/arch/arm64/boot/Image $(pwd)/arch/arm64/boot/Image
 
 cp out/arch/arm64/boot/Image AnyKernel3/Image
 
-KERNEL_RELEASE=$(sed -n 's/^#define UTS_RELEASE "\(.*\)"$/\1/p' out/include/generated/utsrelease.h)
-ZIP_NAME=SpacialKernel4.14-$(date +%Y%m%d)-${KERNEL_RELEASE}.zip
+ZIP_NAME=SpacialKernel4.14-$(date +%Y%m%d)-SM-A225M.zip
 
 rm -f "$ZIP_NAME"
 cd AnyKernel3
