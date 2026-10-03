@@ -1,11 +1,13 @@
-# ReSukiSU for Samsung A22 (MT6768)
+# SpacialKernel4.14 for Samsung A22 (MT6768)
 
 [![Kernel Version](https://img.shields.io/badge/Kernel-4.14.186-blue)]()
+[![Kernel Name](https://img.shields.io/badge/Name-SpacialKernel4.14-orange)]()
 [![Root Solution](https://img.shields.io/badge/ReSukiSU-v4.2.0--rc3-green)]()
 [![Platform](https://img.shields.io/badge/Platform-MT6768-red)]()
 [![Android Version](https://img.shields.io/badge/Android-11--13-lightgrey)]()
 
-Custom kernel source for **Samsung Galaxy A22 (A225F/SM-A225M)** with **ReSukiSU** integrated via manual hooks.
+**SpacialKernel4.14** is a custom kernel for **Samsung Galaxy A22 (A225F/SM-A225M)**
+with **ReSukiSU** integrated via manual hooks.
 
 ---
 
@@ -39,7 +41,7 @@ This is a non-GKI 4.14 kernel, so ReSukiSU runs in **manual hook** mode
 - ✅ **KALLSYMS_ALL Enabled** - All kernel symbols exported for patching
 
 ### Additional Features
-- ✅ **Custom kernel version** - `4.14.186-爪卂丂ㄒ乇尺爪工刀ᗪ丂`
+- ✅ **Custom kernel version** - `4.14.186-SpacialKernel4.14`
 
 ---
 
@@ -246,7 +248,7 @@ so the setup script must be re-run after a fresh clone.
 - ✅ kallsyms hiding implemented
 - ✅ Module hiding implemented
 - ✅ uname spoofing implemented
-- ✅ Custom kernel version: `爪卂丂ㄒ乇尺爪工刀ᗪ丂`
+- ✅ Custom kernel version: `SpacialKernel4.14`
 
 ---
 
@@ -263,7 +265,7 @@ so the setup script must be re-run after a fresh clone.
 - **ravindu644** - [Kitchen](https://github.com/ravindu644/Kitchen) tool
 
 ### Current Maintainer
-- **[@Mastermind](https://t.me/bitcockiii)** - ReSukiSU integration
+- **[@spacexjr](https://github.com/spacexjr)** - SpacialKernel4.14, ReSukiSU integration
 
 ---
 
@@ -301,4 +303,4 @@ The developers are not responsible for any damage to your device, data loss, or 
 
 ---
 
-**Made with ❤️ by Mastermind**
+**Made with ❤️ by spacexjr**
