@@ -6,7 +6,5 @@
 # It is intentionally untracked: drivers/kernelsu is a symlink into it.
 /KernelSU/
 
-# AnyKernel3 packaging: the zip is a release artifact, and the Image that
-# build_kernel.sh drops into AnyKernel3/ is a copy of the build output.
-/AnyKernel3/
+# Generated flashable zip, rebuilt by build_kernel.sh.
 /SpacialKernel4.14-*.zip
