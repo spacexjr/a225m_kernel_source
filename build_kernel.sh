@@ -12,3 +12,15 @@ make -C $(pwd) O=$(pwd)/out KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y a22_d
 make -C $(pwd) O=$(pwd)/out KCFLAGS=-w CONFIG_SECTION_MISMATCH_WARN_ONLY=y -j16
 
 cp out/arch/arm64/boot/Image $(pwd)/arch/arm64/boot/Image
+
+cp out/arch/arm64/boot/Image AnyKernel3/Image
+
+KERNEL_RELEASE=$(sed -n 's/^#define UTS_RELEASE "\(.*\)"$/\1/p' out/include/generated/utsrelease.h)
+ZIP_NAME=SpacialKernel4.14-$(date +%Y%m%d)-${KERNEL_RELEASE}.zip
+
+rm -f "$ZIP_NAME"
+cd AnyKernel3
+zip -r9 "../$ZIP_NAME" . -x .git -x README.md -x LICENSE -x "*.zip"
+cd ..
+
+echo "Zip gerado: $ZIP_NAME"
