@@ -1200,6 +1200,7 @@ endif
 prepare2: prepare3 prepare-compiler-check outputmakefile asm-generic
 
 prepare1: prepare2 $(version_h) include/generated/utsrelease.h \
+                   include/generated/compile.h \
                    include/config/auto.conf
 	$(cmd_crmodverdir)
 
@@ -1323,6 +1324,18 @@ $(version_h): $(srctree)/Makefile FORCE
 
 include/generated/utsrelease.h: include/config/kernel.release FORCE
 	$(call filechk,utsrelease.h)
+
+# Kernels older than 4.16 do not generate include/generated/compile.h, but some
+# in-tree drivers (e.g. ReSukiSU) include it unconditionally. UTS_RELEASE and
+# UTS_MACHINE are the only macros such drivers expect from it; both are already
+# known to the build, they just are not exposed to C on these kernels.
+define filechk_compile.h
+	(echo \#define UTS_RELEASE \"$(KERNELRELEASE)\";	\
+	 echo \#define UTS_MACHINE \"$(UTS_MACHINE)\";)
+endef
+
+include/generated/compile.h: include/config/kernel.release FORCE
+	$(call filechk,compile.h)
 
 PHONY += headerdep
 headerdep:

@@ -1,0 +1,7 @@
+# Kernel build output
+/out/
+
+# ReSukiSU checkout, recreated by:
+#   curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
+# It is intentionally untracked: drivers/kernelsu is a symlink into it.
+/KernelSU/

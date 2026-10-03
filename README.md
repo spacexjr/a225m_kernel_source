@@ -1,35 +1,37 @@
-# KernelSU-Next with susfs for Samsung A22 (MT6768)
+# ReSukiSU for Samsung A22 (MT6768)
 
 [![Kernel Version](https://img.shields.io/badge/Kernel-4.14.186-blue)]()
-[![KernelSU Version](https://img.shields.io/badge/KernelSU-v3.1.0--legacy--susfs-green)]()
-[![susfs Version](https://img.shields.io/badge/susfs-v2.0.0-orange)]()
+[![Root Solution](https://img.shields.io/badge/ReSukiSU-v4.2.0--rc3-green)]()
 [![Platform](https://img.shields.io/badge/Platform-MT6768-red)]()
 [![Android Version](https://img.shields.io/badge/Android-11--13-lightgrey)]()
 
-Custom kernel source for **Samsung Galaxy A22 (A225F/SM-A225M)** with **KernelSU-Next** and **susfs** integration for advanced root hiding and system modification capabilities.
+Custom kernel source for **Samsung Galaxy A22 (A225F/SM-A225M)** with **ReSukiSU** integrated via manual hooks.
 
 ---
 
 ## 📋 Features
 
-### KernelSU-Next
+### ReSukiSU
 - ✅ **Kernel-level root access** - Hidden from most detection methods
 - ✅ **Allowlist management** - Grant root access per-app
-- ✅ **KernelSU Manager support** - Official KSU Manager app compatible
-- ✅ **Manual hook mode** - For kernels without KPROBES support
+- ✅ **ReSukiSU Manager support** - Official manager plus MKSU, RKSU, KOWSU, SukiSU-Ultra
+- ✅ **Manual hook mode** - Required for non-GKI kernels such as this one
 - ✅ **Module support** - Load KSU modules
+- ✅ **sulog** - Built-in superuser call logging
 
-### susfs v2.0.0 (Suspicious File System)
-- ✅ **SUS_PATH** - Hide suspicious paths from system calls
-- ✅ **SUS_MOUNT** - Hide mount entries from /proc/[mounts|mountinfo]
-- ✅ **SUS_KSTAT** - Spoof file/directory statistics
-- ✅ **TRY_UMOUNT** - Auto-umount KSU paths on app spawn
-- ✅ **SPOOF_UNAME** - Spoof kernel version from uname syscall
-- ✅ **HIDE_KSU_SUSFS_SYMBOLS** - Hide symbols from /proc/kallsyms
-- ✅ **SPOOF_CMDLINE** - Spoof /proc/cmdline or /proc/bootconfig
-- ✅ **OPEN_REDIRECT** - Redirect file opens to different paths
-- ✅ **SUS_MAP** - Hide mmapped files from proc maps
-- ✅ **AVC_LOG_SPOOFING** - Spoof SELinux AVC log messages
+### Hook mode
+
+This is a non-GKI 4.14 kernel, so ReSukiSU runs in **manual hook** mode
+(`CONFIG_KSU_MANUAL_HOOK=y`). The following hooks are wired in the kernel source:
+
+| Hook | File |
+|------|------|
+| `ksu_handle_execveat` / `ksu_handle_post_execveat` | `fs/exec.c` |
+| `ksu_handle_faccessat` | `fs/open.c` |
+| `ksu_handle_stat` | `fs/stat.c` |
+| `ksu_handle_newfstat_ret` | `fs/stat.c` |
+| `ksu_handle_sys_reboot` | `kernel/reboot.c` |
+| setuid / init rc / input | automatic via LSM and input handler |
 
 ### KPM (Kernel Package Manager)
 - ✅ **KPM Module Loader** - Load .kpm modules at boot
@@ -37,10 +39,33 @@ Custom kernel source for **Samsung Galaxy A22 (A225F/SM-A225M)** with **KernelSU
 - ✅ **KALLSYMS_ALL Enabled** - All kernel symbols exported for patching
 
 ### Additional Features
-- ✅ **kallsyms hiding** - Hide KSU/susfs symbols
-- ✅ **Module hiding** - Hide modules from lsmod
-- ✅ **uname spoofing** - Spoof kernel release/version
 - ✅ **Custom kernel version** - `4.14.186-爪卂丂ㄒ乇尺爪工刀ᗪ丂`
+
+---
+
+## ⚠️ susfs is NOT enabled
+
+susfs is **not** built into this kernel (`CONFIG_KSU_SUSFS` is off), so none of the
+susfs hiding features are available (SUS_PATH, SUS_MOUNT, SUS_KSTAT, kallsyms hiding,
+uname spoofing, SUS_MAP, open redirect, AVC log spoofing).
+
+The reason is an upstream incompatibility, not a missing patch:
+
+- ReSukiSU ≥ v4.2.0-rc1 offers susfs through its `KSU_SUSFS` hook mode, which requires a
+  susfs kernel side using `static_key` plus a SID-based process-tracking subsystem
+  (`susfs_set_ksu_sid`, `susfs_set_current_proc_umounted`, and 8 more symbols that
+  ReSukiSU declares but does not define).
+- No branch of [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu) provides that. The
+  `kernel-4.14` branch is stuck at v1.5.5 with the old boolean-hook architecture, and
+  the modern `gki-android15-6.6` branch (v2.3.0) has the inline hooks but not the SID
+  subsystem.
+- ReSukiSU's own build guide states: *"The NonGKI branches are deprecated. If you need to
+  use SUSFS, please backport it yourself."*
+
+Making `CONFIG_KSU_SUSFS=y` work here would mean hand-porting susfs v2.3.0 from 6.6 to
+4.14 **and** writing the SID subsystem from scratch. The sources for it are kept in the
+tree (`fs/susfs.c`, `include/linux/susfs.h`, `include/linux/susfs_def.h`) but are
+currently dead code, since they are only compiled when `CONFIG_KSU_SUSFS=y`.
 
 ---
 
@@ -149,13 +174,22 @@ fastboot flash boot new-boot.img
 
 ---
 
-## 🎯 KernelSU Setup
+## 🎯 Root Solution Setup
 
 1. **Flash the boot image** using Odin
-2. **Install KernelSU Manager** from [GitHub Releases](https://github.com/KernelSU-Next/KernelSU-Next/releases)
-3. **Open KSU Manager** - It should show "KernelSU is working"
+2. **Install the manager** from [GitHub Releases](https://github.com/ReSukiSU/ReSukiSU/releases)
+3. **Open the manager** - It should show "ReSukiSU is working"
 4. **Configure allowlist** - Grant root access to apps that need it
 5. **Enable Zygisk** (optional) - For LSPosed and modules
+
+To re-add or update ReSukiSU in this tree:
+
+```bash
+curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
+```
+
+Then regenerate the config and build. `KernelSU/` is intentionally not tracked by git,
+so the setup script must be re-run after a fresh clone.
 
 ---
 
@@ -164,7 +198,7 @@ fastboot flash boot new-boot.img
 - **AVB (Android Verified Boot):** Enabled in kernel
 - **dm-verity:** Enabled in kernel
 - **SELinux:** Enforcing (can be set to permissive via cmdline)
-- **Root hiding:** KernelSU + susfs provides advanced hiding
+- **Root hiding:** ReSukiSU only. susfs is unavailable on this kernel, see above.
 
 ⚠️ **Warning:** This kernel modifies system behavior. Use at your own risk!
 
@@ -179,6 +213,21 @@ fastboot flash boot new-boot.img
 ---
 
 ## 📝 Changelog
+
+### v3.0.0 - ReSukiSU migration
+- ✅ **ReSukiSU v4.2.0-rc3** replaces KernelSU-Next
+- ✅ **Manual hook mode** configured for this non-GKI 4.14 kernel
+- ✅ **Kernel hooks updated** to the ReSukiSU manual-integrate reference
+  - `fs/exec.c`: `ksu_handle_execveat` + `ksu_handle_post_execveat` (drops the old
+    `ksu_execveat_hook` / `ksu_handle_execveat_sucompat` boolean-hook style)
+  - `fs/stat.c`: added `ksu_handle_newfstat_ret` and `ksu_handle_fstat64_ret`
+  - `fs/read_write.c`: dropped the susfs-only `ksu_vfs_read_hook` hook
+- ✅ **`include/generated/compile.h` shim** - ReSukiSU ≥ v4.2.0-rc1 includes this header
+  unconditionally, but only kernels ≥ 4.16 generate it. The top-level `Makefile` now
+  emits it with `UTS_RELEASE` and `UTS_MACHINE`.
+- ⚠️ **susfs disabled** - see the section above for the upstream incompatibility.
+  The susfs sources remain in the tree as dead code.
+- ✅ **Full kernel build verified** (`Image`, all 6 manual hooks detected at build time)
 
 ### v2.0.0 - KPM Support Update
 - ✅ **KPM Module Loader** - Kernel Package Manager support added
@@ -205,7 +254,7 @@ fastboot flash boot new-boot.img
 
 ### Original Development
 - **[@physwizz](https://t.me/physwizz)** - Original kernel backporting and base development
-- **KernelSU-Next Team** - [KernelSU-Next](https://github.com/KernelSU-Next/KernelSU-Next)
+- **ReSukiSU Team** - [ReSukiSU](https://github.com/ReSukiSU/ReSukiSU)
 - **simonpunk** - [susfs4ksu](https://gitlab.com/simonpunk/susfs4ksu)
 
 ### Special Thanks
@@ -214,15 +263,16 @@ fastboot flash boot new-boot.img
 - **ravindu644** - [Kitchen](https://github.com/ravindu644/Kitchen) tool
 
 ### Current Maintainer
-- **[@Mastermind](https://t.me/bitcockiii)** - KernelSU-Next + susfs integration
+- **[@Mastermind](https://t.me/bitcockiii)** - ReSukiSU integration
 
 ---
 
 ## 📚 Sources
 
 - **Kernel Source:** This repository
-- **KernelSU-Next:** https://github.com/KernelSU-Next/KernelSU-Next (legacy_susfs branch)
-- **susfs:** https://gitlab.com/simonpunk/susfs4ksu
+- **ReSukiSU:** https://github.com/ReSukiSU/ReSukiSU
+- **ReSukiSU manual hook reference:** https://resukisu.org/guide/manual-integrate.html
+- **susfs (not enabled, see above):** https://gitlab.com/simonpunk/susfs4ksu
 - **Stock Firmware:** Samsung firmware repositories
 
 ---
@@ -238,8 +288,8 @@ fastboot flash boot new-boot.img
 ## 📄 License
 
 - **Kernel:** GPL-2.0
-- **KernelSU-Next:** GPL-3.0
-- **susfs:** GPL-3.0
+- **ReSukiSU:** GPL-3.0
+- **susfs (unused sources kept in tree):** GPL-3.0
 
 ---
 
